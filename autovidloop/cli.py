@@ -14,6 +14,9 @@ def main():
                       help='a video file readable by FFMPEG')
   parser.add_argument('--output', metavar='FILENAME', type=str,
                       help='an output filename (default is "loop.mp4")')
+  parser.add_argument('--start',
+                      default=1, metavar='N', type=int,
+                      help='frame to start processing (default: 1)')
   parser.add_argument('--skip',
                       default=30, metavar='N', type=int,
                       help='number of frames to skip after the first for diff calculations (default: 30)')
@@ -25,10 +28,14 @@ def main():
   print("AutoVideoLoop\n")
 
   print("input: {}".format(args.input))
+
+  frame_start = args.start
+  print("start frame: {}".format(frame_start))
+
   # How many frames to skip at the start, generally the first few will be highly
   # similar due to lossy compression.
-  frame_skip = args.skip
-  print("skip frames: {}".format(frame_skip))
+  frame_skip = args.skip + args.start
+  print("skip frames (start + skip): {}".format(frame_skip))
 
   reader = imageio.get_reader(args.input)
 
@@ -41,7 +48,7 @@ def main():
     current_frame += 1
 
     # Store the first frame
-    if current_frame == 1:
+    if current_frame == frame_start:
       first = im
       #print("frame: 1")
       continue
@@ -55,7 +62,7 @@ def main():
     # This is a simple way to find the "least" different frames.
     diff = numpy.sum(first-im)
     frames.append((current_frame, diff))
-    #print("frame: {} diff: {}".format(current_frame, diff))
+    print("frame: {} diff: {}".format(current_frame, diff))
 
   sorted_frames = sorted(frames, key=lambda frame: frame[1])
 
@@ -74,9 +81,17 @@ def main():
   writer = imageio.get_writer(args.output, fps=fps)
   for im in reader:
     current_frame += 1
+    # Skip the requested number of frames
+    if current_frame < frame_skip:
+      #print("frame: {} (skipped low)".format(current_frame))
+      continue
+
+    if current_frame >= least_diff_frame_number:
+      #print("frame: {} (skipped high)".format(current_frame))
+      continue
+
     # Save up to, but not including the least different frame.
-    if current_frame < least_diff_frame_number:
-      writer.append_data(im)
+    writer.append_data(im)
     # Warning: All frames must be read to avoid: Fatal Python error: could not
     # acquire lock for <_io.BufferedReader name=20> at interpreter shutdown,
     # possibly due to daemon threads

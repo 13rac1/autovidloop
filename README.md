@@ -4,7 +4,7 @@ Attempt to automatically trim a video to create a loop by finding the video
 frame least different from the first frame. The method is bruteforce, so can
 take significant processing time on large source files.
 
-Works well enough for my needs. YMMV. ¯\_(ツ)_/¯
+Works well enough for my needs. YMMV. ¯\\_(ツ)_/¯
 
 ## Install
 
@@ -17,10 +17,10 @@ pip3 install https://github.com/13rac1/autovidloop/archive/master.zip
 
 ```bash
 $ autovidloop -h
-usage: autovidloop [-h] [--output FILENAME] [--skip N] FILENAME
+usage: autovidloop [-h] [--output FILENAME] [--start N] [--skip N] FILENAME
 
-Attempt to automatically trim a video to create a loop by finding the frame
-least different from the first frame.
+Attempt to automatically trim a video to create a loop by finding the frame least
+different from the first frame.
 
 positional arguments:
   FILENAME           a video file readable by FFMPEG
@@ -28,8 +28,9 @@ positional arguments:
 optional arguments:
   -h, --help         show this help message and exit
   --output FILENAME  an output filename (default is "loop.mp4")
-  --skip N           number of frames to skip after the first for diff
-                     calculations (default: 30)
+  --start N          frame to start processing (default: 1)
+  --skip N           number of frames to skip after the first for diff calculations
+                     (default: 30)
 ```
 
 ## Notes
